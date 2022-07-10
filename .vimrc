@@ -221,6 +221,12 @@ map <C-k> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
 
+" Smart way to resize windows
+map <M-a> :vertical resize +1<cr>
+map <M-d> :vertical resize -1<cr>
+map <M-w> :resize +1<cr>
+map <M-s> :resize -1<cr>
+
 " Close the current buffer
 map <leader>bd :Bclose<cr>:tabclose<cr>gT
 
