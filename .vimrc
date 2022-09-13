@@ -3,7 +3,7 @@
 "    -> General
 "    -> VIM user interface
 "    -> Colors and Fonts
-"    -> Files and backups
+"    -> Files, backups, and fuzzy find
 "    -> Text, tab and indent related
 "    -> Visual mode related
 "    -> Moving around, tabs and buffers
@@ -22,6 +22,13 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Set no compatible 
+set nocompatible
+
+" Remapping ESC key
+" Really useful and fast
+" inoremap jk <esc>
+
 " Shows commands when typing
 set showcmd
 
@@ -33,6 +40,7 @@ set autoindent
 
 " Sets line numbering
 set number
+
 " Sets how many lines of history VIM has to remember
 set history=500
 
@@ -56,12 +64,15 @@ nmap <leader>w :w!<cr>
 " (useful for handling the permission-denied error)
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 
-inoremap { {}<ESC>ha<ENTER><ESC>ko<TAB>
+" Match pairs of triangle brackets '<' and '>'
+" Very useful when working with C++
+set matchpairs+=<:>
+
+inoremap { {}<ESC>ha
 inoremap [ []<ESC>ha
 inoremap ( ()<ESC>ha
 inoremap " ""<ESC>ha
 ""inoremap ' ''<ESC>ha
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
@@ -93,7 +104,7 @@ set ruler
 set cmdheight=1
 
 " A buffer becomes hidden when it is abandoned
-set hidden
+"set hidden
 
 " Configure backspace so it acts as it should act
 set backspace=eol,start,indent
@@ -144,10 +155,10 @@ if $COLORTERM == 'gnome-terminal'
     set t_Co=256
 endif
 
-try
-    colorscheme desert
-catch
-endtry
+""try
+""    colorscheme desert
+""catch
+""endtry
 
 set background=dark
 
@@ -177,6 +188,10 @@ set noswapfile
 " Automatically save before commands like :next and :make
 set autowrite
 
+" Search down into sub-directories
+" Provides tab-completion for all file-related tasks
+set path+=**
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Text, tab and indent related
@@ -195,8 +210,8 @@ set tabstop=4
 set lbr
 set tw=500
 
-set ai "Auto indent
-set si "Smart indent
+set autoindent "Auto indent
+set smartindent "Smart indent
 set wrap "Wrap lines
 
 
@@ -215,51 +230,61 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " Disable highlight when <leader><cr> is pressed
 map <silent> <leader><cr> :noh<cr>
 
-" Smart way to move between windows
-map <C-j> <C-W>j
-map <C-k> <C-W>k
-map <C-h> <C-W>h
-map <C-l> <C-W>l
+" Move between windows
+nnoremap <leader>j <C-W>j
+nnoremap <leader>k <C-W>k
+nnoremap <leader>h <C-W>h
+nnoremap <leader>l <C-W>l
 
-" Smart way to resize windows
-map <silent> <M-a> :vertical resize +1<cr>
-map <silent> <M-d> :vertical resize -1<cr>
-map <silent> <M-w> :resize +1<cr>
-map <silent> <M-s> :resize -1<cr>
+" Resize windows
+nnoremap <silent> <C-d> :vertical resize +3<cr>
+nnoremap <silent> <C-a> :vertical resize -3<cr>
+nnoremap <silent> <C-w> :resize +3<cr>
+nnoremap <silent> <C-s> :resize -3<cr>
+
+" Move between tabs
+nnoremap <silent><C-h> :tabprevious<cr>
+nnoremap <silent><C-l> :tabnext<cr>
+
+" Move current tab one position to the left
+nnoremap <silent><C-j> :tabmove -1<cr>   
+"Move current tab one position to the right
+nnoremap <silent><C-k> :tabmove +1<cr>   
 
 " Close the current buffer
-map <leader>bd :Bclose<cr>:tabclose<cr>gT
+map <silent><leader>bd :Bclose<cr>:tabclose<cr>gT
 
 " Close all the buffers
 map <leader>ba :bufdo bd<cr>
 
-map <leader>l :bnext<cr>
-map <leader>h :bprevious<cr>
-
-" Useful mappings for managing tabs
+" Managing tabs
 map <leader>tn :tabnew<cr>
 map <leader>to :tabonly<cr>
 map <leader>tc :tabclose<cr>
-map <leader>tm :tabmove 
-map <leader>t<leader> :tabnext 
+map <leader>tl :tablast<cr>
 
 " Let 'tl' toggle between this and the last accessed tab
-let g:lasttab = 1
-nmap <Leader>tl :exe "tabn ".g:lasttab<CR>
-au TabLeave * let g:lasttab = tabpagenr()
+" Uncomment to use
+"let g:lasttab = 1
+"nmap <Leader>tl :exe "tabn ".g:lasttab<CR>
+"au TabLeave * let g:lasttab = tabpagenr()
 
 
 " Opens a new tab with the current buffer's path
 " Super useful when editing files in the same directory
 map <leader>te :tabedit <C-r>=expand("%:p:h")<cr>/
 
+" you can use (:tabfind pattern) to search for a file recursively starting from
+" current directory
+map <leader>tf :tabfind 
+
 " Switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
 " Specify the behavior when switching between buffers 
 try
-  set switchbuf=useopen,usetab,newtab
-  set stal=2
+  set switchbuf=usetab,newtab "useopen,usetab,newtab
+  set showtabline=2
 catch
 endtry
 
@@ -277,19 +302,9 @@ set laststatus=2
 " Useless Feature ! uncomment the following line to use it
 "set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l\ \ Column:\ %c
 
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Editing mappings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Remap VIM 0 to first non-blank character
-map 0 ^
-
-" Move a line of text using ALT+[jk]
-nmap <M-j> mz:m+<cr>`z
-nmap <M-k> mz:m-2<cr>`z
-vmap <M-j> :m'>+<cr>`<my`>mzgv`yo`z
-vmap <M-k> :m'<-2<cr>`>my`<mzgv`yo`z
-
 " Delete trailing white space on save, useful for some filetypes ;)
 fun! CleanExtraSpaces()
     let save_cursor = getpos(".")
@@ -390,6 +405,9 @@ endfunction
 " => Enumerate Tabs
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Useful for switch between tabs using n + gt where n is tab number
+" Actally this turns out to be useless since we can use <C-h> and <C-l> mappings
+"     to move between tabs
+" To use it, uncomment the last line in this section
 function! MyTabLabel(n)
     let buflist = tabpagebuflist(a:n)
     let winnr = tabpagewinnr(a:n)
@@ -421,13 +439,13 @@ function! MyTabLine()
     endfor
     return s
 endfunction
-set tabline=%!MyTabLine()
+"set tabline=%!MyTabLine()
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Save View and Load View
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Useful for saving folds and other things between sessions
-autocmd BufWinLeave *.* mkview
+autocmd  BufWinLeave *.* silent mkview
 autocmd BufWinEnter *.* silent loadview
 
 
