@@ -26,8 +26,9 @@
 set nocompatible
 
 " Remapping ESC key
-" Really useful and fast
 " inoremap jk <esc>
+
+set clipboard=unnamedplus,unnamed
 
 " Shows commands when typing
 set showcmd
@@ -55,7 +56,7 @@ au FocusGained,BufEnter * checktime
 " With a map leader it's possible to do extra key combinations
 " like <leader>w saves the current file
 " UNCOMMENT the next line to change the leader to ',' instead of '\'
-let mapleader = ","
+let mapleader = " "
 
 " Fast saving
 nmap <leader>w :w!<cr>
@@ -73,6 +74,11 @@ inoremap [ []<ESC>ha
 inoremap ( ()<ESC>ha
 inoremap " ""<ESC>ha
 ""inoremap ' ''<ESC>ha
+
+set complete+=kspell
+set completeopt=menuone,longest
+set mouse=a
+set shortmess+=c
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
